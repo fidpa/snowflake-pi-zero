@@ -1,0 +1,20 @@
+[Unit]
+Description=Snowflake Metrics HTTP Server - @DEVICE_NAME@
+After=network.target snowflake-proxy.service
+Wants=snowflake-proxy.service
+
+[Service]
+Type=simple
+User=@SERVICE_USER@
+ExecStart=/usr/bin/python3 @INSTALL_DIR@/snowflake-metrics-server.py @DEVICE_NAME@
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+# Resource limits
+MemoryMax=32M
+CPUQuota=5%
+
+[Install]
+WantedBy=multi-user.target

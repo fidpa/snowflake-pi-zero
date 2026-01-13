@@ -1,0 +1,83 @@
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*~
+
+# Logs
+*.log
+logs/
+*.out
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.swp
+*.swo
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+*.pyc
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.iml
+*.swp
+
+# Secrets (should never be committed)
+*.key
+*.pem
+*.p12
+.env
+.env.secrets
+secrets/
+
+# Test artifacts
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# Backup files
+*.bak
+*.backup
+*~
+
+# systemd generated files (local only)
+*.service.deployed
+*.timer.deployed
+
+# Metrics (local device data)
+*.prom
+metrics/
+
+# Local configuration overrides
+config.local.*

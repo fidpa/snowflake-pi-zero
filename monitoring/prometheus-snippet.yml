@@ -1,0 +1,14 @@
+# Prometheus Scrape Configuration for Snowflake Proxies
+# Add this to your prometheus.yml under scrape_configs:
+
+scrape_configs:
+  - job_name: 'snowflake-proxy'
+    static_configs:
+      - targets:
+          - '192.168.1.100:9092'  # Replace with your device IP
+          - '192.168.1.101:9092'  # Add more devices as needed
+        labels:
+          service: 'snowflake'
+          type: 'tor-proxy'
+    scrape_interval: 30s
+    scrape_timeout: 10s

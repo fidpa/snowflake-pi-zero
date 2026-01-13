@@ -1,0 +1,10 @@
+[Unit]
+Description=Snowflake Metrics Exporter - @DEVICE_NAME@
+After=snowflake-proxy.service
+
+[Service]
+Type=oneshot
+User=@SERVICE_USER@
+ExecStart=@INSTALL_DIR@/snowflake-metrics-exporter.sh @DEVICE_NAME@
+StandardOutput=journal
+StandardError=journal

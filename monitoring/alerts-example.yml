@@ -1,0 +1,36 @@
+# Prometheus Alerting Rules for Snowflake Proxy
+# Add this to your Prometheus alerting rules configuration
+
+groups:
+  - name: snowflake_alerts
+    interval: 30s
+    rules:
+      - alert: SnowflakeServiceDown
+        expr: snowflake_service_status == 0
+        for: 5m
+        labels:
+          severity: critical
+          service: snowflake
+        annotations:
+          summary: "Snowflake proxy service down on {{ $labels.device }}"
+          description: "The Snowflake proxy service on {{ $labels.device }} has been down for more than 5 minutes."
+
+      - alert: SnowflakeHighMemoryUsage
+        expr: snowflake_proxy_memory_bytes > 120000000  # 120MB
+        for: 5m
+        labels:
+          severity: warning
+          service: snowflake
+        annotations:
+          summary: "High memory usage on {{ $labels.device }}"
+          description: "Snowflake proxy on {{ $labels.device }} is using {{ $value | humanize }}B of memory (threshold: 120MB)."
+
+      - alert: SnowflakeNoConnections
+        expr: snowflake_connected_clients == 0 and snowflake_service_status == 1
+        for: 1h
+        labels:
+          severity: info
+          service: snowflake
+        annotations:
+          summary: "No Tor connections on {{ $labels.device }}"
+          description: "Snowflake proxy on {{ $labels.device }} has had 0 connections for over 1 hour."

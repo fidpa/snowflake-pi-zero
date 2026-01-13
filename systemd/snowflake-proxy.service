@@ -1,0 +1,60 @@
+[Unit]
+Description=Tor Snowflake Proxy - @DEVICE_NAME@
+Documentation=https://snowflake.torproject.org/
+After=network-online.target
+Wants=network-online.target
+StartLimitIntervalSec=300
+
+[Service]
+Type=simple
+User=snowflake
+Group=snowflake
+
+# Binary path (installed via apt or custom location)
+ExecStart=@INSTALL_DIR@/snowflake-proxy \
+    -capacity 5 \
+    -summary-interval 5m \
+    -verbose
+
+# Working directory
+WorkingDirectory=@INSTALL_DIR@
+
+# Logging
+StandardOutput=append:@LOG_DIR@/snowflake-proxy.log
+StandardError=append:@LOG_DIR@/snowflake-proxy.log
+SyslogIdentifier=snowflake-proxy
+
+# Security Hardening (systemd sandboxing)
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictRealtime=true
+RestrictNamespaces=true
+RestrictSUIDSGID=true
+
+# Network access (required for WebRTC/STUN)
+PrivateNetwork=false
+
+# Allow reading /proc for stats
+ProcSubset=pid
+
+# Read-write paths (logs only)
+ReadWritePaths=@LOG_DIR@
+
+# Resource limits (conservative for 512MB RAM Pi Zero)
+MemoryMax=128M
+MemoryHigh=96M
+CPUQuota=30%
+
+# Restart policy
+Restart=on-failure
+RestartSec=30s
+StartLimitBurst=5
+
+[Install]
+WantedBy=multi-user.target

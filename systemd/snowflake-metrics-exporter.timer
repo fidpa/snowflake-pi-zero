@@ -1,0 +1,10 @@
+[Unit]
+Description=Snowflake Metrics Exporter Timer - @DEVICE_NAME@
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=5min
+Persistent=true
+
+[Install]
+WantedBy=timers.target
