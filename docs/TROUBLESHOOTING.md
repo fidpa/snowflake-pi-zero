@@ -95,7 +95,7 @@ systemctl is-active snowflake-proxy.service
 grep "WebRTC" /var/log/snowflake/snowflake-proxy.log
 
 # Check NAT type
-# (Install stun-client: sudo apt install stuntman-client)
+# (Install stun-client: sudo apt install stun-client)
 stunclient stun.l.google.com:19302
 ```
 

@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # Snowflake Pi Zero Installer
-# Version: 1.0.0
+# Version: 1.1.0
 # One-line install: curl -sSL https://raw.githubusercontent.com/fidpa/snowflake-pi-zero/main/install.sh | bash
 #
 # This script installs Tor Snowflake Proxy on Raspberry Pi Zero with monitoring and bandwidth management.
@@ -180,7 +180,19 @@ install_binary() {
     fi
 
     if command -v snowflake-proxy &> /dev/null; then
-        success "Snowflake binary already installed"
+        local binary_path=$(command -v snowflake-proxy)
+        success "Snowflake binary already installed at: $binary_path"
+
+        # Ensure install directory exists
+        sudo mkdir -p "$INSTALL_DIR"
+
+        # Create symlink if binary is not already in install directory
+        if [[ "$binary_path" != "${INSTALL_DIR}/snowflake-proxy" ]]; then
+            log "Creating symlink: ${INSTALL_DIR}/snowflake-proxy -> $binary_path"
+            sudo ln -sf "$binary_path" "${INSTALL_DIR}/snowflake-proxy"
+            success "Symlink created for systemd service"
+        fi
+
         return 0
     fi
 
@@ -190,6 +202,24 @@ install_binary() {
         sudo apt update -qq
         if sudo apt install -y tor-snowflake-proxy 2>/dev/null; then
             success "Installed tor-snowflake-proxy via apt"
+
+            # Create symlink to install directory (systemd service expects binary at $INSTALL_DIR)
+            local binary_path
+            if command -v snowflake-proxy &> /dev/null; then
+                binary_path=$(command -v snowflake-proxy)
+                log "Found binary at: $binary_path"
+
+                # Ensure install directory exists
+                sudo mkdir -p "$INSTALL_DIR"
+
+                # Create symlink if binary is not already in install directory
+                if [[ "$binary_path" != "${INSTALL_DIR}/snowflake-proxy" ]]; then
+                    log "Creating symlink: ${INSTALL_DIR}/snowflake-proxy -> $binary_path"
+                    sudo ln -sf "$binary_path" "${INSTALL_DIR}/snowflake-proxy"
+                    success "Symlink created for systemd service"
+                fi
+            fi
+
             return 0
         fi
     fi
@@ -245,7 +275,7 @@ create_directories() {
     done
 
     if ! $DRY_RUN; then
-        sudo chown snowflake:snowflake "$INSTALL_DIR" "$LOG_DIR"
+        sudo chown snowflake:snowflake "$INSTALL_DIR" "$LOG_DIR" "$METRICS_DIR"
         success "Directories created with correct permissions"
     fi
 }
@@ -349,13 +379,13 @@ configure_bandwidth() {
     fi
 
     log "Applying $profile profile..."
-    sudo "${INSTALL_DIR}/tc-bandwidth-limiter.sh" --interface "$INTERFACE" "$profile"
+    sudo "${INSTALL_DIR}/tc-bandwidth-limiter.sh" --interface "$INTERFACE" --daytime-limit "$BANDWIDTH_DAYTIME" --nighttime-limit "$BANDWIDTH_NIGHTTIME" "$profile"
 
     # Add cron jobs
     log "Setting up automatic profile switching..."
     (sudo crontab -l 2>/dev/null | grep -v tc-bandwidth-limiter; cat << EOF
-0 9 * * * ${INSTALL_DIR}/tc-bandwidth-limiter.sh --interface ${INTERFACE} daytime
-0 0 * * * ${INSTALL_DIR}/tc-bandwidth-limiter.sh --interface ${INTERFACE} nighttime
+0 9 * * * ${INSTALL_DIR}/tc-bandwidth-limiter.sh --interface ${INTERFACE} --daytime-limit ${BANDWIDTH_DAYTIME} --nighttime-limit ${BANDWIDTH_NIGHTTIME} daytime
+0 0 * * * ${INSTALL_DIR}/tc-bandwidth-limiter.sh --interface ${INTERFACE} --daytime-limit ${BANDWIDTH_DAYTIME} --nighttime-limit ${BANDWIDTH_NIGHTTIME} nighttime
 EOF
     ) | sudo crontab -
 

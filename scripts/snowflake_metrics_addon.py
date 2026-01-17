@@ -3,7 +3,7 @@
 Snowflake Metrics Addon for Prometheus Exporter
 Reads textfile collector metrics and registers them with prometheus_client
 
-Version: 1.0.0
+Version: 1.1.0
 Created: 12. Januar 2026
 Devices: GPIO Pi Zeros (Bedroom, Bathroom)
 

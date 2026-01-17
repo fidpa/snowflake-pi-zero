@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # snowflake-metrics-exporter.sh
-# Version: 1.0.0
+# Version: 1.1.0
 # Created: 11. Januar 2026
 #
 # Purpose: Export Snowflake proxy metrics to Prometheus textfile collector
@@ -10,6 +10,7 @@
 #   - snowflake_connected_clients: Number of currently connected Tor clients
 #   - snowflake_bytes_proxied_total: Total bytes proxied through Snowflake
 #   - snowflake_proxy_uptime_seconds: Snowflake proxy uptime in seconds
+#   - snowflake_proxy_memory_bytes: Memory usage of snowflake-proxy process in bytes
 #   - snowflake_service_status: Service status (1=running, 0=stopped)
 #
 # Usage:
@@ -70,6 +71,20 @@ get_service_status() {
     fi
 }
 
+get_memory_bytes() {
+    # Get process memory usage in bytes (RSS)
+    if pgrep -x snowflake-proxy >/dev/null 2>&1; then
+        local rss_kb=$(ps -C snowflake-proxy -o rss= 2>/dev/null | tr -d ' ')
+        if [[ -n "$rss_kb" && "$rss_kb" =~ ^[0-9]+$ ]]; then
+            echo $((rss_kb * 1024))
+        else
+            echo "0"
+        fi
+    else
+        echo "0"
+    fi
+}
+
 # ============================================================================
 # MAIN
 # ============================================================================
@@ -85,6 +100,7 @@ else
 fi
 
 UPTIME_SECONDS=$(get_uptime_seconds)
+MEMORY_BYTES=$(get_memory_bytes)
 SERVICE_STATUS=$(get_service_status)
 
 # Generate Prometheus metrics
@@ -101,11 +117,15 @@ snowflake_bytes_proxied_total{device="$DEVICE_NAME"} $BYTES_PROXIED
 # TYPE snowflake_proxy_uptime_seconds gauge
 snowflake_proxy_uptime_seconds{device="$DEVICE_NAME"} $UPTIME_SECONDS
 
+# HELP snowflake_proxy_memory_bytes Memory usage of snowflake-proxy process in bytes
+# TYPE snowflake_proxy_memory_bytes gauge
+snowflake_proxy_memory_bytes{device="$DEVICE_NAME"} $MEMORY_BYTES
+
 # HELP snowflake_service_status Snowflake service status (1=running, 0=stopped)
 # TYPE snowflake_service_status gauge
 snowflake_service_status{device="$DEVICE_NAME"} $SERVICE_STATUS
 EOF
 
-log "Metrics exported: clients=$CONNECTED_CLIENTS, bytes=$BYTES_PROXIED, uptime=${UPTIME_SECONDS}s, status=$SERVICE_STATUS"
+log "Metrics exported: clients=$CONNECTED_CLIENTS, bytes=$BYTES_PROXIED, uptime=${UPTIME_SECONDS}s, memory=${MEMORY_BYTES}B, status=$SERVICE_STATUS"
 
 exit 0

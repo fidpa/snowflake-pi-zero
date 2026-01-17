@@ -1,19 +1,20 @@
 #!/bin/bash
 #
 # tc-bandwidth-limiter.sh
-# Version: 1.0.0
+# Version: 1.1.0
 # Created: 11. Januar 2026
 #
 # Purpose: Limit egress bandwidth for Snowflake proxy using tc-netem TBF (Token Bucket Filter)
 #
 # Profiles:
-#   - daytime:   6 Mbps (09:00-00:00)
-#   - nighttime: 20 Mbps (00:00-09:00)
+#   - daytime:   Apply daytime bandwidth limit (default: 6 Mbps, configurable via --daytime-limit)
+#   - nighttime: Apply nighttime bandwidth limit (default: 20 Mbps, configurable via --nighttime-limit)
 #   - remove:    Remove all bandwidth limits
 #
 # Usage:
 #   ./tc-bandwidth-limiter.sh --interface wlan0 daytime
-#   ./tc-bandwidth-limiter.sh --interface wlan0 nighttime
+#   ./tc-bandwidth-limiter.sh --interface wlan0 --daytime-limit 10 daytime
+#   ./tc-bandwidth-limiter.sh --nighttime-limit 30 nighttime
 #   ./tc-bandwidth-limiter.sh --interface wlan0 remove
 
 set -uo pipefail
@@ -26,9 +27,9 @@ set -uo pipefail
 INTERFACE="${SNOWFLAKE_INTERFACE:-wlan0}"
 PROFILE=""
 
-# Bandwidth profiles (in kbit for tc)
-readonly DAYTIME_LIMIT="6mbit"     # 6 Mbps = 6000 kbit/s
-readonly NIGHTTIME_LIMIT="20mbit"  # 20 Mbps = 20000 kbit/s
+# Bandwidth profiles (in mbit for tc, can be overridden with --daytime-limit and --nighttime-limit)
+DAYTIME_LIMIT="${SNOWFLAKE_DAYTIME_LIMIT:-6mbit}"     # Default: 6 Mbps
+NIGHTTIME_LIMIT="${SNOWFLAKE_NIGHTTIME_LIMIT:-20mbit}"  # Default: 20 Mbps
 readonly BURST="32kbit"             # Allow brief bursts (32 KB)
 readonly LATENCY="50ms"             # Maximum latency
 
@@ -52,27 +53,31 @@ error() {
 
 print_usage() {
     cat << EOF
-Usage: $0 [--interface INTERFACE] <profile>
+Usage: $0 [OPTIONS] <profile>
 
 Limit egress bandwidth for Snowflake proxy using tc-netem Token Bucket Filter.
 
 OPTIONS:
-    --interface INTERFACE   Network interface (default: wlan0)
+    --interface INTERFACE       Network interface (default: wlan0)
+    --daytime-limit MBPS        Daytime bandwidth limit in Mbps (default: 6)
+    --nighttime-limit MBPS      Nighttime bandwidth limit in Mbps (default: 20)
 
 PROFILES:
-    daytime     Apply 6 Mbps limit (09:00-00:00)
-    nighttime   Apply 20 Mbps limit (00:00-09:00)
+    daytime     Apply daytime bandwidth limit (09:00-00:00)
+    nighttime   Apply nighttime bandwidth limit (00:00-09:00)
     remove      Remove all bandwidth limits
 
 EXAMPLES:
-    $0 --interface wlan0 daytime     # Limit to 6 Mbps
-    $0 nighttime                     # Limit to 20 Mbps (default interface)
-    $0 remove                        # Remove limits
+    $0 --interface wlan0 daytime                    # Limit to 6 Mbps (default)
+    $0 --daytime-limit 10 daytime                   # Limit to 10 Mbps
+    $0 --nighttime-limit 30 nighttime               # Limit to 30 Mbps
+    $0 --interface wlan0 --daytime-limit 8 daytime  # Custom interface + limit
+    $0 remove                                       # Remove limits
 
 TECHNICAL DETAILS:
-    Daytime:   $DAYTIME_LIMIT ($BURST burst, $LATENCY latency)
-    Nighttime: $NIGHTTIME_LIMIT ($BURST burst, $LATENCY latency)
-    Method:    Token Bucket Filter (TBF)
+    Current Daytime:   $DAYTIME_LIMIT ($BURST burst, $LATENCY latency)
+    Current Nighttime: $NIGHTTIME_LIMIT ($BURST burst, $LATENCY latency)
+    Method:            Token Bucket Filter (TBF)
 
 EOF
 }
@@ -86,6 +91,14 @@ while [[ $# -gt 0 ]]; do
     case $1 in
         --interface)
             INTERFACE="$2"
+            shift 2
+            ;;
+        --daytime-limit)
+            DAYTIME_LIMIT="${2}mbit"
+            shift 2
+            ;;
+        --nighttime-limit)
+            NIGHTTIME_LIMIT="${2}mbit"
             shift 2
             ;;
         daytime|nighttime|remove)

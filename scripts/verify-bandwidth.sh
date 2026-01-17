@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # verify-bandwidth.sh
-# Version: 1.0.0
+# Version: 1.1.0
 # Created: 11. Januar 2026
 #
 # Purpose: Verify tc-netem bandwidth limiting configuration
