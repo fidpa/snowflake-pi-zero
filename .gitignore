@@ -81,3 +81,6 @@ metrics/
 
 # Local configuration overrides
 config.local.*
+
+# Nextcloud/Rclone symlinks
+*.rclonelink
