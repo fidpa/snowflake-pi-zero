@@ -1,5 +1,23 @@
 # Performance Analysis
 
+## TL;DR
+
+WiFi signal quality directly impacts WebRTC connection success: -66 dBm = ~70% success, -72 dBm = ~30% success. Pi Zero 2W resources: 15-40 MB RAM, 2-10% CPU typical. Bandwidth profiles: 6 Mbps daytime, 20 Mbps nighttime. Unequal load distribution across devices is normal.
+
+---
+
+## Table of Contents
+
+- [WiFi Signal Impact on Connection Success](#wifi-signal-impact-on-connection-success)
+- [Multi-Device Load Distribution](#multi-device-load-distribution)
+- [Resource Constraints (Pi Zero 2W)](#resource-constraints-pi-zero-2w)
+- [Bandwidth Profiles](#bandwidth-profiles)
+- [Scaling Considerations](#scaling-considerations)
+- [Performance Benchmarks](#performance-benchmarks)
+- [Advanced Optimization](#advanced-optimization)
+
+---
+
 ## WiFi Signal Impact on Connection Success
 
 ### Key Finding: Signal Strength Matters

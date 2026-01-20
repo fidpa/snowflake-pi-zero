@@ -7,6 +7,24 @@
 
 Production-ready Tor Snowflake Proxy deployment for Raspberry Pi Zero.
 
+## Table of Contents
+
+- [Components](#components)
+- [Features](#features)
+- [Quick Start](#quick-start)
+- [Component Overview](#component-overview)
+- [Key Concepts](#key-concepts)
+- [Requirements](#requirements)
+- [Compatibility](#compatibility)
+- [Use Cases](#use-cases)
+- [Documentation](#documentation)
+- [Performance Expectations](#performance-expectations)
+- [See Also](#see-also)
+- [License](#license)
+- [Contributing](#contributing)
+
+---
+
 **The Problem**: Snowflake proxies help users in censored regions access Tor, but deploying them on resource-constrained devices requires careful configuration. Default setups lack monitoring, bandwidth control, and proper systemd integration. After running dual Snowflake proxies on Pi Zero 2W devices for production use, I've extracted a complete deployment stack with monitoring, bandwidth management, and operational documentation.
 
 ## Components
@@ -217,10 +235,12 @@ Marc Allgeier ([@fidpa](https://github.com/fidpa))
 
 ## Contributing
 
-Contributions welcome! Please open an issue or pull request.
+Contributions welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 **Areas where help is appreciated**:
 - Testing on other Raspberry Pi models
 - Additional Grafana dashboard panels
 - Ansible/Terraform automation
 - Translation of documentation
+
+For security vulnerabilities, please see [SECURITY.md](SECURITY.md).

@@ -1,5 +1,23 @@
 # Troubleshooting Guide
 
+## TL;DR
+
+Service won't start? Check `journalctl -u snowflake-proxy.service -n 50`. No connections after 24h? Normal - wait 2-3 days. High memory (>120MB)? Restart service or reduce capacity to 3. WiFi drops? Target -66 dBm or better. Complete reset: run `install.sh` again.
+
+---
+
+## Table of Contents
+
+- [Service Issues](#service-issues)
+- [Connection Issues](#connection-issues)
+- [Resource Issues](#resource-issues)
+- [Monitoring Issues](#monitoring-issues)
+- [Bandwidth Limiting Issues](#bandwidth-limiting-issues)
+- [Complete System Failure](#complete-system-failure)
+- [Getting Help](#getting-help)
+
+---
+
 ## Service Issues
 
 ### Service Won't Start

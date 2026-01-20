@@ -1,5 +1,11 @@
 # Installation Guide
 
+## TL;DR
+
+One-line install: `curl -sSL https://raw.githubusercontent.com/fidpa/snowflake-pi-zero/main/install.sh | bash`. Manual: 6 steps (install binary, create user, directories, scripts, systemd, enable services). Full setup takes ~10 minutes.
+
+---
+
 ## Prerequisites
 
 ### Hardware Requirements

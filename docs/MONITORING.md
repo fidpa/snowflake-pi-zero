@@ -1,5 +1,24 @@
 # Monitoring Guide
 
+## TL;DR
+
+4 Prometheus metrics (`snowflake_connected_clients`, `snowflake_bytes_proxied_total`, `snowflake_proxy_uptime_seconds`, `snowflake_service_status`). Scrape from `localhost:9092/metrics`. Import Grafana dashboard from `monitoring/grafana-dashboard.json`. Alert on `snowflake_service_status == 0`.
+
+---
+
+## Table of Contents
+
+- [Metrics Overview](#metrics-overview)
+- [Prometheus Setup](#prometheus-setup)
+- [Grafana Dashboard](#grafana-dashboard)
+- [Alerting](#alerting)
+- [Performance Baselines](#performance-baselines)
+- [Daily Health Checks](#daily-health-checks)
+- [Advanced Monitoring](#advanced-monitoring)
+- [Troubleshooting Monitoring](#troubleshooting-monitoring)
+
+---
+
 ## Metrics Overview
 
 Snowflake Proxy exports four key metrics via Prometheus:
