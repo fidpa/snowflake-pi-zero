@@ -3,7 +3,7 @@
 # SPDX-FileCopyrightText: 2026 Marc Allgeier
 #
 # Snowflake Pi Zero Installer
-# Version: 1.2.0
+# Version: 1.3.0
 # One-line install: curl -sSL https://raw.githubusercontent.com/fidpa/snowflake-pi-zero/main/install.sh | bash
 #
 # This script installs Tor Snowflake Proxy on Raspberry Pi Zero with monitoring and bandwidth management.

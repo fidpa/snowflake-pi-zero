@@ -19,9 +19,9 @@ ExecStart=@INSTALL_DIR@/snowflake-proxy \
 # Working directory
 WorkingDirectory=@INSTALL_DIR@
 
-# Logging
-StandardOutput=append:@LOG_DIR@/snowflake-proxy.log
-StandardError=append:@LOG_DIR@/snowflake-proxy.log
+# Logging (systemd creates /var/log/snowflake via LogsDirectory)
+StandardOutput=append:/var/log/snowflake/snowflake-proxy.log
+StandardError=append:/var/log/snowflake/snowflake-proxy.log
 SyslogIdentifier=snowflake-proxy
 
 # Security Hardening (systemd sandboxing)
@@ -43,8 +43,8 @@ PrivateNetwork=false
 # Allow reading /proc for stats
 ProcSubset=pid
 
-# Read-write paths (logs only)
-ReadWritePaths=@LOG_DIR@
+# Logging directory (systemd auto-creates /var/log/snowflake with correct permissions)
+LogsDirectory=snowflake
 
 # Resource limits (conservative for 512MB RAM Pi Zero)
 MemoryMax=128M
