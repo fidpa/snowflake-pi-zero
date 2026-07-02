@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # snowflake-metrics-exporter.sh
-# Version: 1.1.0
+# Version: 1.2.0
 # Created: 11. Januar 2026
 #
 # Purpose: Export Snowflake proxy metrics to Prometheus textfile collector
@@ -39,14 +39,21 @@ get_connected_clients() {
     # Example log lines:
     #   "In the last 5m0s, there were 1 connections."
     #   "In the last 1h0m0s, there have been 3 connections."
-    grep -oP 'there (were|have been) \K\d+(?= connections?)' "$LOG_FILE" 2>/dev/null | tail -1 || echo "0"
+    # -a: an unrotated log accumulates NUL bytes (partial writes after a power
+    # loss); plain grep then treats it as binary and returns only the last clean
+    # match (stale). tail first so we scan just the recent appends at the end.
+    local clients
+    clients=$(tail -n 2000 "$LOG_FILE" 2>/dev/null | grep -oaP 'there (were|have been) \K\d+(?= connections?)' | tail -1)
+    echo "${clients:-0}"
 }
 
 get_bytes_proxied() {
     # Parse total bytes from logs
     # Example: "Traffic Relayed ↑ 2011 KB, ↓ 146 KB."
-    # We extract the upload bytes (↑) and convert KB to bytes
-    local kb_uploaded=$(grep -oP 'Traffic Relayed ↑ \K\d+(?= KB)' "$LOG_FILE" 2>/dev/null | tail -1)
+    # We extract the upload bytes (↑) and convert KB to bytes.
+    # tail + grep -oaP: byte-safe against NUL bytes in the log (see above).
+    local kb_uploaded
+    kb_uploaded=$(tail -n 2000 "$LOG_FILE" 2>/dev/null | grep -oaP 'Traffic Relayed ↑ \K\d+(?= KB)' | tail -1)
     if [[ -n "$kb_uploaded" ]]; then
         echo $((kb_uploaded * 1024))
     else

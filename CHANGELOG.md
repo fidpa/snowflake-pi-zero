@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0] - 2026-07-02
+
+### Added
+- `configs/snowflake-logrotate` and `install.sh` now installs `/etc/logrotate.d/snowflake`
+  (daily rotation, 7-day retention, `copytruncate`). Prevents unbounded log growth and
+  bounds NUL-byte accumulation from partial writes after a Pi Zero power loss.
+
+### Fixed
+- `snowflake-metrics-exporter.sh`: parse the proxy log byte-safely
+  (`tail -n 2000 | grep -oaP`). Previously plain `grep` treated a NUL-corrupted log as
+  binary and returned stale `connected_clients` / `bytes_proxied` values (frozen metrics).
+- `monitoring/grafana-dashboard.json`: now shipped as the raw dashboard model instead of
+  the API-wrapped `{"dashboard": {...}}` form. The wrapped form imported as an empty
+  dashboard (no panels) via the Grafana UI and broke file-based provisioning.
+
+### Changed
+- `snowflake-metrics-exporter.sh` version bumped to 1.2.0.
+- `docs/TROUBLESHOOTING.md`: added entries for stale metrics (NUL bytes in log) and
+  empty imported dashboards.
+
 ## [1.4.0] - 2026-01-21
 
 ### Added

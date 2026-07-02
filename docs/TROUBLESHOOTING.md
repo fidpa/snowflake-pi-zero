@@ -262,6 +262,19 @@ cat /var/lib/node_exporter/textfile_collector/snowflake_*.prom
    sudo chown pi:pi /var/lib/node_exporter/textfile_collector/snowflake_*.prom
    ```
 
+4. **Metrics frozen at stale values (NUL bytes in the log)**:
+   ```bash
+   # An unrotated log can accumulate NUL bytes after a Pi Zero power loss.
+   # grep then treats the file as binary and the exporter parses old values.
+   tr -cd '\000' < /var/log/snowflake/snowflake-proxy.log | wc -c   # >0 = corrupted
+
+   # Fix: rotate to start with a clean file
+   sudo logrotate -f /etc/logrotate.d/snowflake
+   ```
+   The bundled `configs/snowflake-logrotate` (installed by `install.sh`) rotates
+   daily to keep this from recurring. The exporter also parses byte-safely
+   (`tail | grep -oaP`), so this only affected setups on older exporter versions.
+
 ### Grafana Dashboard Shows No Data
 
 **Diagnosis**:
@@ -283,6 +296,11 @@ curl -G http://localhost:9090/api/v1/query --data-urlencode 'query=snowflake_ser
 
 3. **Metric names changed**:
    - Verify metric names match: `curl http://localhost:9092/metrics`
+
+4. **Dashboard imported but shows empty / no panels**:
+   - The JSON must be the raw dashboard model, not the API-wrapped
+     `{"dashboard": {...}}` form. `monitoring/grafana-dashboard.json` ships
+     unwrapped so it works for both UI import and file provisioning.
 
 ## Bandwidth Limiting Issues
 

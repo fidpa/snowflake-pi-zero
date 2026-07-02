@@ -1,0 +1,23 @@
+# Tor Snowflake Proxy - logrotate (deploy to /etc/logrotate.d/snowflake)
+#
+# copytruncate is required: snowflake-proxy holds the log file descriptor open
+# via the systemd unit's `StandardOutput=append:` redirection. A rename-based
+# rotation (the default `create` mode) would leave the process writing to the
+# renamed inode, so the new file would stay empty. Truncating in place keeps the
+# descriptor valid without restarting the proxy (a restart would drop active Tor
+# connections). systemd opens the file with O_APPEND, so after truncation the
+# proxy cleanly resumes writing at offset 0 (no sparse-file hole).
+#
+# Why this matters: without rotation the log grows unbounded and, on Pi Zero
+# power loss, accumulates NUL bytes from partial writes. grep then treats the
+# file as binary and the metrics exporter parses stale values. Keeping the file
+# small (daily, 7-day retention) bounds that damage.
+/var/log/snowflake/*.log {
+    daily
+    rotate 7
+    compress
+    delaycompress
+    missingok
+    notifempty
+    copytruncate
+}

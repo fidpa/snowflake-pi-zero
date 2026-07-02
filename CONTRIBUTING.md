@@ -47,7 +47,7 @@ Feature requests are welcome! Please:
 - [ ] Tested on Pi Zero 2W
 - [ ] ShellCheck passes (if Bash)
 - [ ] Documentation updated (README.md, docs/)
-- [ ] Commit messages are clear (describe *why*, not just *what*)
+- [ ] Commit messages are clear (describe _why_, not just _what_)
 
 ## 📝 Code Style
 

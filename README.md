@@ -1,10 +1,12 @@
 # Snowflake Pi Zero
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)
+![Release](https://img.shields.io/github/v/release/fidpa/snowflake-pi-zero)
 ![Raspberry Pi](https://img.shields.io/badge/Raspberry%20Pi-Zero%202W-C51A4A?logo=raspberrypi)
 ![Tor Project](https://img.shields.io/badge/Tor-Snowflake-7D4698?logo=torproject)
 ![Prometheus](https://img.shields.io/badge/Prometheus-Metrics-E6522C?logo=prometheus)
 ![CI](https://github.com/fidpa/snowflake-pi-zero/actions/workflows/lint.yml/badge.svg)
+![Last Commit](https://img.shields.io/github/last-commit/fidpa/snowflake-pi-zero)
 
 Production-ready Tor Snowflake Proxy deployment for Raspberry Pi Zero.
 

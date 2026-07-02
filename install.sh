@@ -360,6 +360,37 @@ install_services() {
 }
 
 # ============================================================================
+# CONFIGURE LOG ROTATION
+# ============================================================================
+
+configure_logrotate() {
+    log "Configuring log rotation..."
+
+    if $DRY_RUN; then
+        log "[DRY RUN] Would install /etc/logrotate.d/snowflake"
+        return 0
+    fi
+
+    local repo_url="https://raw.githubusercontent.com/fidpa/snowflake-pi-zero/main"
+
+    if ! curl -sSL -o /tmp/snowflake-logrotate "${repo_url}/configs/snowflake-logrotate"; then
+        warn "Failed to download snowflake-logrotate; skipping log rotation"
+        return 0
+    fi
+
+    sudo cp /tmp/snowflake-logrotate /etc/logrotate.d/snowflake
+    sudo chown root:root /etc/logrotate.d/snowflake
+    sudo chmod 644 /etc/logrotate.d/snowflake
+
+    # logrotate --debug is a dry run that also validates the config
+    if sudo logrotate --debug /etc/logrotate.d/snowflake >/dev/null 2>&1; then
+        success "Log rotation configured (/etc/logrotate.d/snowflake)"
+    else
+        warn "logrotate config installed but failed validation"
+    fi
+}
+
+# ============================================================================
 # CONFIGURE BANDWIDTH LIMITING
 # ============================================================================
 
@@ -510,6 +541,7 @@ main() {
     create_directories || exit 1
     install_scripts || exit 1
     install_services || exit 1
+    configure_logrotate || exit 1
     configure_bandwidth || exit 1
     start_services || exit 1
     verify_installation || exit 1
