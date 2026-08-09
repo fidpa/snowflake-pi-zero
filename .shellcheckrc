@@ -1,7 +1,6 @@
-# .shellcheckrc - Pi-Router + NAS Server shellcheck config
-# Multi-Device Setup: 552 Shell-Scripts (Pi 5: ~249, NAS: ~303)
-# Best Practices 2025 compliant
-# Optimized for ShellCheck 0.9.0+ (Last reviewed: 12. Dezember 2025)
+# .shellcheckrc - ShellCheck configuration for snowflake-pi-zero
+# Targets: install.sh and the Bash scripts under scripts/
+# Optimized for ShellCheck 0.9.0+
 #
 # References:
 # - https://www.shellcheck.net/wiki/Directive
@@ -48,6 +47,17 @@ source-path=SCRIPTDIR
 # Safely enables shellcheck to open sourced files where possible
 external-sources=true
 
-# Minimum severity threshold (focus on errors + warnings)
-# Consistent with script-audit.sh Production-Ready threshold (85%+ clean)
-severity=warning
+# Minimum severity threshold: NOT configurable here.
+#
+# ShellCheck has no `severity` key for .shellcheckrc. A line such as
+# `severity=warning` is silently discarded -- it behaves exactly like a
+# made-up key, with no diagnostic. Verified against ShellCheck 0.9.0 on
+# scripts/verify-bandwidth.sh: the SC2015 info-level finding is reported
+# either way, and only `--severity=warning` on the command line suppresses it.
+#
+# The effective threshold is therefore set in .github/workflows/lint.yml:
+#     shellcheck --severity=error
+#
+# Raising it to `warning` requires clearing four warnings first
+# (SC2034 install.sh, SC2155 install.sh x2 and snowflake-metrics-exporter.sh).
+# Change the workflow, not this file.

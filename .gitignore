@@ -52,6 +52,17 @@ env/
 *.iml
 *.swp
 
+# Local agent tooling and private notes (never publish)
+.claude/
+CLAUDE.md
+TODO.md
+NOTES.md
+*_POST.md
+*_TEMPLATE.md
+*.local
+*.private
+*.draft
+
 # Secrets (should never be committed)
 *.key
 *.pem

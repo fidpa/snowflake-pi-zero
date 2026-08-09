@@ -5,6 +5,42 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.1] - 2026-08-09
+
+### Removed
+- `SUMMARY.md` — an internal pre-publication document that had been shipped since the
+  very first commit. It carried a private working path, the original private device
+  IPs and device names it claimed to have sanitised, and a marketing section. Nothing
+  linked to it and it had not been updated since v1.0.0; `README.md` and
+  `ARCHITECTURE.md` cover the same ground.
+- `LINKEDIN_POST.md` — a German-language marketing draft that does not belong in a
+  public repository.
+
+### Changed
+- `.github/workflows/release.yml`: release notes are now cut from `CHANGELOG.md`
+  instead of being generated from commit messages. This repository's commit subjects
+  are bare version numbers, so `generate_release_notes` alone produced nothing but the
+  compare link and the real notes had to be pasted in by hand after every run. The job
+  now fails instead of publishing an empty release when a version has no changelog
+  section. `generate_release_notes` stays enabled, so the compare link is still
+  appended.
+- `.shellcheckrc`: replaced the `severity=warning` line with a comment explaining why
+  it never worked. ShellCheck has no `severity` key for this file and discards unknown
+  keys silently — verified against ShellCheck 0.9.0, where the SC2015 finding in
+  `scripts/verify-bandwidth.sh` is reported with or without the line, and only
+  `--severity=warning` on the command line suppresses it. The effective threshold is
+  `--severity=error` in `.github/workflows/lint.yml`, now documented there as well.
+  The file header also described unrelated infrastructure and now names this project.
+
+### Fixed
+- `CHANGELOG.md`: added the missing `[1.5.0]` link reference at the end of the file.
+
+### Security
+- `.gitignore`: added `*_POST.md`, `TODO.md`, `NOTES.md`, `*_TEMPLATE.md`, `*.local`,
+  `*.private`, `*.draft` and `.claude/`. Ignore rules only apply to untracked files, so
+  this prevents the next such draft from being committed rather than repairing the two
+  above.
+
 ## [1.5.0] - 2026-07-02
 
 ### Added
@@ -115,6 +151,8 @@ StandardOutput=append:/var/log/snowflake/snowflake-proxy.log
 
 ---
 
+[1.5.1]: https://github.com/fidpa/snowflake-pi-zero/compare/v1.5.0...v1.5.1
+[1.5.0]: https://github.com/fidpa/snowflake-pi-zero/compare/v1.4.0...v1.5.0
 [1.4.0]: https://github.com/fidpa/snowflake-pi-zero/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/fidpa/snowflake-pi-zero/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/fidpa/snowflake-pi-zero/compare/v1.1.0...v1.2.0

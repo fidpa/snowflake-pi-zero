@@ -15,10 +15,31 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          # Full history: generate_release_notes needs it for the compare link.
+          fetch-depth: 0
+
+      # Release notes come from CHANGELOG.md, not from commit messages.
+      # This repository's commit subjects are bare version numbers, so
+      # generate_release_notes alone would produce nothing but the compare
+      # link. It stays enabled -- GitHub appends its generated notes to the
+      # body supplied below, which reproduces the layout of earlier releases.
+      - name: Extract changelog section
+        run: |
+          VERSION="${GITHUB_REF#refs/tags/v}"
+          VER_ESC=$(printf '%s' "$VERSION" | sed 's/\./\\./g')
+          sed -n "/^## \[${VER_ESC}\]/,/^## \[/{ /^## \[/d; p; }" \
+            CHANGELOG.md > release-notes.md
+          if [ ! -s release-notes.md ]; then
+            echo "No CHANGELOG section for ${VERSION}" >&2
+            exit 1
+          fi
+          wc -c release-notes.md
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
+          body_path: release-notes.md
           generate_release_notes: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          draft: false
+          prerelease: ${{ contains(github.ref, '-') }}
