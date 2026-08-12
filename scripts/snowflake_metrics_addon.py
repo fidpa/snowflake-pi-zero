@@ -3,13 +3,13 @@
 Snowflake Metrics Addon for Prometheus Exporter
 Reads textfile collector metrics and registers them with prometheus_client
 
-Version: 1.1.0
+Version: 1.1.1
 Created: 12. Januar 2026
-Devices: GPIO Pi Zeros (Bedroom, Bathroom)
+Devices: GPIO Pi Zeros (multiple locations)
 
 Usage:
     from snowflake_metrics_addon import SnowflakeMetrics
-    snowflake = SnowflakeMetrics(location="bedroom")
+    snowflake = SnowflakeMetrics(location="pi-zero-01")
     snowflake.update()  # Call in main loop
 """
 
@@ -32,12 +32,12 @@ class SnowflakeMetrics:
     - snowflake_service_status{device}
     """
 
-    def __init__(self, location: str = "bedroom"):
+    def __init__(self, location: str = "pi-zero-01"):
         """
         Initialize Snowflake metrics collector
 
         Args:
-            location: Device location (bedroom or bathroom)
+            location: Device location identifier (e.g. "pi-zero-01")
         """
         self.location = location
         self.metrics_file = Path(f"/var/lib/node_exporter/textfile_collector/snowflake_{location}.prom")
@@ -108,7 +108,7 @@ class SnowflakeMetrics:
             return False
 
 
-def get_snowflake_status(location: str = "bedroom") -> dict:
+def get_snowflake_status(location: str = "pi-zero-01") -> dict:
     """
     Get current Snowflake status as dict (for non-Prometheus use)
 

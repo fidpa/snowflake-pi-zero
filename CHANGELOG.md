@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.3] - 2026-08-12
+
+### Security
+- `scripts/snowflake_metrics_addon.py`, `scripts/snowflake-metrics-server.py`: replaced
+  real private-residence room names used as example device locations (default
+  parameter values, docstrings, usage examples) with the generic `pi-zero-01` /
+  `pi-zero-02` placeholders already used elsewhere in this repository (README.md,
+  install.sh). The room names had been present since v1.1.0 and did not affect
+  functionality — `location` is a free-form string — but revealed real information
+  about a private home.
+
+### Changed
+- `scripts/snowflake_metrics_addon.py`, `scripts/snowflake-metrics-server.py` version
+  bumped to 1.1.1.
+
 ## [1.5.2] - 2026-08-12
 
 ### Fixed
@@ -159,6 +174,7 @@ StandardOutput=append:/var/log/snowflake/snowflake-proxy.log
 
 ---
 
+[1.5.3]: https://github.com/fidpa/snowflake-pi-zero/compare/v1.5.2...v1.5.3
 [1.5.2]: https://github.com/fidpa/snowflake-pi-zero/compare/v1.5.1...v1.5.2
 [1.5.1]: https://github.com/fidpa/snowflake-pi-zero/compare/v1.5.0...v1.5.1
 [1.5.0]: https://github.com/fidpa/snowflake-pi-zero/compare/v1.4.0...v1.5.0

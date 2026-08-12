@@ -3,7 +3,7 @@
 Snowflake Metrics HTTP Server
 Simple HTTP server to expose Snowflake metrics for Prometheus scraping
 
-Version: 1.1.0
+Version: 1.1.1
 Created: 12. Januar 2026
 Port: 9092
 
@@ -11,9 +11,8 @@ Usage:
     ./snowflake-metrics-server.py <device-name>
 
 Examples:
-    ./snowflake-metrics-server.py bedroom
-    ./snowflake-metrics-server.py bathroom
     ./snowflake-metrics-server.py pi-zero-01
+    ./snowflake-metrics-server.py pi-zero-02
     ./snowflake-metrics-server.py snowflake
 """
 
@@ -87,7 +86,7 @@ def main() -> int:
     """Main entry point"""
     if len(sys.argv) < 2:
         print("Usage: snowflake-metrics-server.py <device-name>")
-        print("Example: snowflake-metrics-server.py bedroom")
+        print("Example: snowflake-metrics-server.py pi-zero-01")
         return 1
 
     location = sys.argv[1]
