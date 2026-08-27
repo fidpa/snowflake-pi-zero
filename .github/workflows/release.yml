@@ -25,20 +25,45 @@ jobs:
       # link. It stays enabled -- GitHub appends its generated notes to the
       # body supplied below, which reproduces the layout of earlier releases.
       - name: Extract changelog section
+        id: changelog
         run: |
           VERSION="${GITHUB_REF#refs/tags/v}"
-          VER_ESC=$(printf '%s' "$VERSION" | sed 's/\./\\./g')
-          sed -n "/^## \[${VER_ESC}\]/,/^## \[/{ /^## \[/d; p; }" \
-            CHANGELOG.md > release-notes.md
+          HEADING="## [${VERSION}]"
+
+          # index($0, head) == 1 anchors the match to the start of the line. A
+          # substring search would match a heading whose headline mentions a
+          # different version number and cut out the wrong section.
+          awk -v head="$HEADING" '
+            index($0, head) == 1 { p=1; next }
+            /^## \[/ { if (p) exit }
+            p { print }
+          ' CHANGELOG.md > release-notes.md
           if [ ! -s release-notes.md ]; then
             echo "No CHANGELOG section for ${VERSION}" >&2
             exit 1
           fi
           wc -c release-notes.md
 
+          # The release title comes from the same heading, so title and body
+          # cannot drift apart. Without a name: input, action-gh-release falls
+          # back to the bare tag name.
+          HEADLINE=$(awk -v head="$HEADING" '
+            index($0, head) == 1 {
+              if (match($0, /- [0-9]{4}-[0-9]{2}-[0-9]{2}: /)) {
+                print substr($0, RSTART + RLENGTH); exit
+              }
+            }
+          ' CHANGELOG.md)
+          if [ -n "$HEADLINE" ]; then
+            echo "title=v${VERSION}: ${HEADLINE}" >> "$GITHUB_OUTPUT"
+          else
+            echo "title=v${VERSION}" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
+          name: ${{ steps.changelog.outputs.title }}
           body_path: release-notes.md
           generate_release_notes: true
           draft: false
