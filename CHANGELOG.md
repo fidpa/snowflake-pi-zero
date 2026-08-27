@@ -5,21 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.5.4] - 2026-08-27: Release notes carry their own headline, and eight claims were corrected
+## [1.5.5] - 2026-08-27: Removal entries name what went, not what was in it
+
+An entry about something that should not have been public can restate the thing it removed.
+The file leaves the tree but stays in the history, so a description of its contents turns a
+missed artefact into a signposted one. The rule this repository follows now is to name what
+was removed and why it did not belong, and to leave out what it held.
+
+### Changed
+- **Entries about removed material describe the removal, not the material.** The `[1.5.1]`
+  and `[1.5.3]` sections say what left the repository and why it should not have been there;
+  the descriptions of their contents are gone. What was removed, and the fact that it was
+  removed, is unchanged.
+- **The `[1.5.4]` section states what now holds instead of how much did not before.** The
+  individual corrections stay where they are, each as its own entry; the summary of how many
+  there were and how long they had stood is not part of a release page.
+
+## [1.5.4] - 2026-08-27: Release notes carry their own headline
 
 Every release page in this repository was rewritten in one editorial pass against the
-release-message rules this portfolio follows. Two things came out of it. First, the
-mechanics: nine release titles used a hyphen where the rules ask for a colon, the release
-workflow set no title at all so every future release would have fallen back to the bare tag
-name, and exactly one of the 51 changelog entries opened with a bold line, which marked a
-breaking change rather than stating what changes for the operator. Second, and more important, eight statements in the older sections did not survive
-being checked against the tags they describe. Six of them sit in the `[1.1.0]` section, which
-credited work to files that release never touched while omitting the metric and the
-command-line options it actually shipped.
+release-message rules this portfolio follows: each entry now opens with what changes for the
+operator, the sections describing an incident name the symptom first, and the release title
+comes from the changelog instead of being typed by hand after the run.
 
 Nothing about the released software changed. Every measured value, path and function name in
-the older sections was verified against the tag it describes and kept; only statements that
-the code contradicts were corrected, and the corrections are listed below.
+the older sections was verified against the tag it describes and kept; statements the code
+contradicted were corrected, and those corrections are listed below.
 
 ### Changed
 - **Release titles are now generated from the changelog instead of being typed by hand.**
@@ -38,51 +49,37 @@ the code contradicts were corrected, and the corrections are listed below.
   from `vX.Y.Z - Headline` to `vX.Y.Z: Headline`.
 
 ### Fixed
-- **The `[1.0.0]` memory limit was wrong by a factor of two.** The section listed
-  `MemoryMax=256M`; `systemd/snowflake-proxy.service` has carried `MemoryMax=128M` since the
-  first commit and in every tag up to `v1.5.3`. Corrected to 128M.
-- **The `[1.1.0]` section credited five changes to the wrong files and omitted the two it
-  shipped.** Checked against the diff between the first commit and `v1.1.0`: the section
-  claimed `scripts/snowflake_metrics_addon.py` was added (it existed in the first commit and
-  that release changed only its version header), claimed extended systemd hardening (the only
-  systemd change resolved the `@SERVICE_USER@` placeholder to `snowflake`), claimed new
-  troubleshooting entries (a typo fix, `stuntman-client` to `stun-client`), claimed an
-  improved bandwidth verification script (version header only), and claimed a fix to restart
-  behaviour under memory pressure (`snowflake-proxy.service` was not touched). Unlisted were
-  the `snowflake_proxy_memory_bytes` metric and the `--daytime-limit` / `--nighttime-limit`
-  options, which are what the release title referred to. The section now describes what the
-  diff shows.
-- **The `[1.5.3]` section dated the private room names to the wrong release.** They were
-  present in the first commit, not introduced in 1.1.0. Corrected to 1.0.0.
+- **The `[1.0.0]` section listed a memory limit the unit never carried.** It said
+  `MemoryMax=256M`; `systemd/snowflake-proxy.service` has `MemoryMax=128M` in every tag from
+  the first commit to `v1.5.3`. Corrected to 128M.
+- **The `[1.1.0]` section now describes what that release actually shipped.** It is rewritten
+  against the diff between the first commit and `v1.1.0`: the `snowflake_proxy_memory_bytes`
+  metric in `snowflake-metrics-exporter.sh` and the `--daytime-limit` / `--nighttime-limit`
+  options in `tc-bandwidth-limiter.sh`, which are what the release title referred to.
+- **The `[1.5.3]` section named the wrong release for the placeholders it replaced.**
+  Corrected against the tags.
 - **`CHANGELOG.md`: removed five em dashes** from the `[1.5.1]` and `[1.5.3]` sections. The
   file is now plain ASCII.
 
 ### Notes
-- **The tag `v1.0.0` points at the wrong commit and stays there.** It is a lightweight tag on
-  `462b629`, the 1.2.0 commit, while the real first release commit `a376c76` carries no tag.
-  This happened on 2026-01-20, when the releases for 1.0.0, 1.1.0 and 1.2.0 were created
-  retroactively within 14 seconds and GitHub placed the missing tag on the then-current HEAD.
-  The consequence is visible on the release page: the compare link for v1.0.0 to v1.1.0 reads
-  as a removal of 485 lines. A published tag is not moved, so this is recorded rather than
+- **The tag `v1.0.0` does not mark the first release commit, and it is not moved.** It points
+  at the same commit as `v1.2.0`, so the compare link between v1.0.0 and v1.1.0 shows a
+  removal rather than the additions that release made. Build against `v1.1.0` or later if the
+  distinction matters. A published tag is not moved, so this is documented rather than
   repaired.
-- **Two commits in the January 2026 history carry a version subject but no tag and no
-  section**: `cb6efac` ("v1.0.1", three lines in `.gitignore`) and `ba33c32` ("v1.4.1", which
-  added the `[1.4.0]` section that the `v1.4.0` tag had shipped without). They are left as
-  they are; tagging them now would fail the workflow, which requires a changelog section.
 
-## [1.5.3] - 2026-08-12: Private room names gone from the example code
+## [1.5.3] - 2026-08-12: Generic placeholders in the example device locations
 
-The two Python scripts used the room names of a private residence as their example device
-locations. The `location` argument is a free-form string, so the names never affected how the
-code ran, but they had been readable in the public repository since the first commit and said
-something about a real home.
+The two Python scripts carried example device locations from the author's own deployment
+instead of generic placeholders. The `location` argument is a free-form string, so they never
+affected how the code ran.
 
 ### Security
-- **Example device locations no longer name rooms in a private residence.**
-  `scripts/snowflake_metrics_addon.py` and `scripts/snowflake-metrics-server.py` used real
-  room names as default parameter values, in docstrings and in usage examples. They now use
-  the generic `pi-zero-01` and `pi-zero-02` placeholders that `README.md` and `install.sh`
-  already used.
+- **The example device locations are now generic.**
+  `scripts/snowflake_metrics_addon.py` and `scripts/snowflake-metrics-server.py` used
+  deployment-specific names as default parameter values, in docstrings and in usage examples.
+  They now use the `pi-zero-01` and `pi-zero-02` placeholders that `README.md` and
+  `install.sh` already used.
 
 ### Changed
 - **The two Python scripts report version 1.1.1.** Header version bumped in
@@ -96,21 +93,18 @@ something about a real home.
   committed with mode `644` and are now `755`. Before this, running `./install.sh` failed
   with `Permission denied` and required `bash install.sh` instead.
 
-## [1.5.1] - 2026-08-09: Private drafts removed and release notes cut from the changelog
+## [1.5.1] - 2026-08-09: Internal drafts removed and release notes cut from the changelog
 
 Two files that were never meant to be published had shipped with the releases before this one:
-a pre-publication summary carrying a private working path along with the device names and
-addresses it claimed to have sanitised, present since the first commit, and a German marketing
-draft that arrived with 1.5.0. Nothing linked to either of them. The same pass fixed the
-release workflow, which produced empty notes because this repository's commit subjects are
-bare version numbers.
+an internal pre-publication summary and a German marketing draft. Neither was referenced from
+anywhere in the repository. The same pass fixed the release workflow, which produced empty
+notes because this repository's commit subjects are bare version numbers.
 
 ### Removed
-- **The repository no longer ships a document containing a private working path and private
-  device names.** `SUMMARY.md` was an internal pre-publication document present since the
-  first commit, carrying a private working path, the original private device IPs and device
-  names it claimed to have sanitised, and a marketing section. Nothing linked to it and it had
-  not been updated since 1.0.0; `README.md` and `ARCHITECTURE.md` cover the same ground.
+- **The repository no longer ships an internal pre-publication document.** `SUMMARY.md` was a
+  working document that was never meant to be part of the public repository. Nothing linked to
+  it and it had not been updated since the first release; `README.md` and `ARCHITECTURE.md`
+  cover the same ground.
 - **The repository no longer ships a German-language marketing draft.** `LINKEDIN_POST.md`
   does not belong in a public repository.
 
@@ -293,6 +287,7 @@ saturating the WiFi link, and exposes what it is doing to Prometheus.
 
 ---
 
+[1.5.5]: https://github.com/fidpa/snowflake-pi-zero/compare/v1.5.4...v1.5.5
 [1.5.4]: https://github.com/fidpa/snowflake-pi-zero/compare/v1.5.3...v1.5.4
 [1.5.3]: https://github.com/fidpa/snowflake-pi-zero/compare/v1.5.2...v1.5.3
 [1.5.2]: https://github.com/fidpa/snowflake-pi-zero/compare/v1.5.1...v1.5.2
