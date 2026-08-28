@@ -228,7 +228,9 @@ Typical 24h stats per Pi Zero 2W:
 
 ## License
 
-MIT License - see [LICENSE](LICENSE) for details.
+MIT - see [LICENSE](LICENSE). The Snowflake proxy binary is not part of this
+repository and carries the Tor Project's BSD 3-Clause License; see
+[NOTICE](NOTICE).
 
 ## Author
 

@@ -1,0 +1,15 @@
+Third-party components
+======================
+
+This repository is licensed under the MIT License (see LICENSE). It contains
+scripts, systemd units, configuration, and documentation only; the component
+listed below is NOT part of this repository and is NOT redistributed by it.
+
+Snowflake proxy binary
+----------------------
+`install.sh` installs the `tor-snowflake-proxy` package through the system
+package manager, or points at the Tor Project's release page when that fails.
+The binary is part of the Tor Project and is licensed under the BSD 3-Clause
+License:
+
+  https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake

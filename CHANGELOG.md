@@ -5,6 +5,36 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.6] - 2026-08-28: GitHub identifies the license as MIT
+
+GitHub reported no license for this project, and has done so since the first
+commit: `LICENSE` carried the MIT text followed by a note about the Tor
+Project's proxy binary.
+GitHub's license detection reads any addition to the MIT text as a modification.
+The license field on the repository page therefore stayed empty, and a
+repository without a detected license matches no `license:` filter in GitHub
+search, while the README badge said MIT. The note itself was correct and stays,
+in the file where such information belongs.
+
+### Changed
+
+- **The license field on the repository page says MIT.** `LICENSE` now carries
+  the MIT text and nothing else; with the note removed it is byte-identical to
+  that of a repository GitHub reports as `mit`. Nothing about the terms changed:
+  the proxy binary was never covered, because `install_binary()` in `install.sh`
+  installs the `tor-snowflake-proxy` package through the system package manager
+  or points at the Tor Project's release page, and this repository has never
+  contained it.
+- **The BSD 3-Clause reference has its own file.** `NOTICE` names the Snowflake
+  proxy binary, where it comes from, and the license it carries. `README.md`
+  points at it from the `## License` section, which read "MIT License - see
+  LICENSE for details" and named no third-party terms.
+
+### Upgrade notes
+
+None. This release changes no code and no terms; it moves an informational note
+out of `LICENSE` and into `NOTICE`.
+
 ## [1.5.5] - 2026-08-27: Removal entries name what went, not what was in it
 
 An entry about something that should not have been public can restate the thing it removed.
