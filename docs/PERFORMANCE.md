@@ -24,11 +24,19 @@ WiFi signal quality directly impacts WebRTC connection success: -66 dBm = ~70% s
 
 Real-world deployment data shows **WiFi signal quality directly impacts WebRTC connection success rates**.
 
-| Signal Strength | Connection Success Rate | Expected Clients/Hour |
-|-----------------|------------------------|----------------------|
+| Signal Strength | Connection Success Rate | Completed Connections/Day |
+|-----------------|------------------------|---------------------------|
 | -66 dBm (Good) | ~70% | 7-8 connections |
 | -72 dBm (Fair) | ~30% | 3-4 connections |
 | Difference | **2.3x improvement** | ~4 more connections |
+
+The connection counts are per device per day. They were labelled "per hour"
+until 2026-08-30, which put them at odds with every other figure in this
+document: 7 and 4 sum to the 11 under [load
+distribution](#multi-device-load-distribution), and 11 is the count the
+[bandwidth section](#real-world-traffic-patterns) pairs with a daily 2-5 GB.
+An hourly rate would mean 168-192 connections a day against a stated normal
+band of 4-12.
 
 ### Why This Happens
 
@@ -84,12 +92,14 @@ Real-world deployment data shows **WiFi signal quality directly impacts WebRTC c
 
 Example from real deployment:
 
-| Device | Signal | Connections/Hour | Reason |
+| Device | Signal | Connections/Day | Reason |
 |--------|--------|-----------------|--------|
 | Device A | -66 dBm | 7 connections | Good signal = fewer timeouts |
 | Device B | -72 dBm | 4 connections | Fair signal = more timeouts |
 
-**Total capacity utilized**: 11 connections/hour across 10 client slots (5 per device)
+**Total**: 11 completed connections per day across the pair. The `-capacity 5`
+per device is a ceiling on *concurrent* clients and was never what limited this;
+the constraint was how many WebRTC handshakes finished.
 
 ### Tor Broker Load-Balancing
 

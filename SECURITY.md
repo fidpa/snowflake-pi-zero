@@ -16,11 +16,12 @@ We will respond within 72 hours and provide a timeline for fixes.
 
 We provide security updates for the following versions:
 
-| Version | Supported          | Notes                          |
-| ------- | ------------------ | ------------------------------ |
-| 1.x     | :white_check_mark: Yes | Active development             |
-| 0.9.x   | :warning: Security fixes only | Upgrade to 1.0.0 recommended |
-| < 0.9.0 | :x: No              | No longer supported            |
+| Version | Supported | Notes |
+| ------- | --------- | ----- |
+| 1.x | :white_check_mark: Yes | The only release line; 1.0.0 was the first tag |
+
+There is no 0.x line. Fixes land on the latest 1.x release, and the deployment
+is a handful of files, so upgrading means re-running `install.sh`.
 
 ---
 
@@ -29,28 +30,64 @@ We provide security updates for the following versions:
 This project implements the following security measures:
 
 ### Snowflake Proxy Security
-- **No User Data Storage**: Snowflake proxies never store user traffic
-- **Minimal Logging**: Only operational metrics (connections, bytes transferred)
-- **Process Isolation**: Dedicated user (`snowflake`) with minimal privileges
-- **Memory-Only Operation**: No persistent state that could be seized
+- **No traffic content on disk**: The proxy relays WebRTC data channels and
+  writes none of their contents. What it does write is a log
+  (`/var/log/snowflake/snowflake-proxy.log`, `-verbose`): connection counts and
+  relayed byte totals per 5-minute summary interval, plus the proxy's own
+  operational lines. `configs/snowflake-logrotate` bounds it at seven daily
+  files, so it is persistent state, not memory-only.
+- **Process isolation**: The proxy and the metrics exporter run as a dedicated
+  system user (`snowflake`) created with `--no-create-home --shell
+  /usr/sbin/nologin`. The metrics HTTP server runs as `@SERVICE_USER@`, the
+  account that installed it, because it needs read access to the textfile
+  collector.
 
 ### systemd Hardening
-- **PrivateTmp=true**: Isolated temp directories
-- **NoNewPrivileges=true**: Prevents privilege escalation
-- **ProtectSystem=strict**: Read-only root filesystem
-- **ProtectHome=read-only**: Protected home directories
-- **CapabilityBoundingSet=CAP_NET_BIND_SERVICE**: Only network capabilities
-- **MemoryMax=256M**: Resource limits to prevent DoS
+
+`snowflake-proxy.service` carries eleven sandboxing directives:
+`NoNewPrivileges`, `ProtectSystem=strict`, `ProtectHome=true`, `PrivateTmp`,
+`PrivateDevices`, `ProtectKernelTunables`, `ProtectKernelModules`,
+`ProtectControlGroups`, `RestrictRealtime`, `RestrictNamespaces` and
+`RestrictSUIDSGID`, plus `ProcSubset=pid`. Resource limits are
+`MemoryMax=128M`, `MemoryHigh=96M` and `CPUQuota=30%`. The memory cap sits above
+the 60-80 MB peak observed with five clients and below what would starve a
+512 MB board.
+
+`PrivateNetwork` is deliberately false: WebRTC and STUN need the real network
+stack. No `CapabilityBoundingSet` is set, because the proxy binds no privileged
+port and needs no capability to drop.
+
+**This block applies to the proxy service alone.**
+`snowflake-metrics-server.service` gets `MemoryMax=32M` and `CPUQuota=5%` and no
+sandboxing; `snowflake-metrics-exporter.service` is a plain oneshot unit with
+neither.
 
 ### Network Security
-- **Bandwidth Limiting**: tc-netem prevents network saturation (default: 2 Mbit/s)
-- **WiFi Monitoring**: Auto-recovery on connection loss
-- **No Inbound Ports**: Snowflake uses WebRTC (outbound only)
+- **Bandwidth limiting**: `tc-bandwidth-limiter.sh` applies a TBF qdisc, 6 Mbps
+  daytime and 20 Mbps nighttime by default, switched by cron at 00:00 and 09:00.
+  It replaces the **root qdisc on the whole interface**, so the cap covers all
+  egress traffic from the device and deletes any tc configuration already there.
+- **The proxy opens no inbound port**: Snowflake is outbound WebRTC.
+- **The metrics server does.** `snowflake-metrics-server.py` listens on
+  `0.0.0.0:9092` and serves `/metrics` and `/health` to any host that can reach
+  it, with no authentication and no TLS. It exposes five operational gauges and
+  no traffic content, but it is the one listening socket this stack adds:
+  restrict it with a firewall rule or bind the host to a trusted network. Skip
+  it entirely with `install.sh --no-monitoring`.
 
 ### Operational Security
-- **No Secrets in Code**: All configuration via environment variables
-- **Minimal Dependencies**: Only Go runtime + system utilities
-- **Reproducible Builds**: Install script is idempotent
+- **No secrets**: The stack holds no tokens, keys or credentials. Configuration
+  is command-line flags and a few `SNOWFLAKE_*` environment variables.
+- **Dependencies**: The `tor-snowflake-proxy` package from the distribution, a
+  Python 3 interpreter for the metrics server (standard library only),
+  `iproute2` for `tc`, and cron. `prometheus_client` is needed only if you use
+  `snowflake_metrics_addon.py`.
+- **Idempotent installer**: Re-running `install.sh` reuses an existing binary,
+  user and directories, and rewrites its own cron lines instead of appending.
+  `--dry-run` prints every step without touching the system. This is
+  re-runnability, not a reproducible build: the installer fetches the scripts
+  from `main` on GitHub, so two runs on different days can install different
+  content.
 
 ---
 
@@ -67,7 +104,8 @@ This project implements the following security measures:
 
 **Mitigation**:
 1. **No action needed**: This is expected behavior for Snowflake proxies
-2. **Bandwidth limits**: Default 2 Mbit/s prevents bandwidth abuse
+2. **Bandwidth limits**: The default 6/20 Mbps profiles cap what the proxy can
+   draw from the household uplink
 3. **Monitoring**: Prometheus metrics expose only aggregate statistics
 
 **Impact**: ISP may flag Tor participation. In most jurisdictions, running a Snowflake proxy is legal.
@@ -83,7 +121,10 @@ This project implements the following security measures:
 **Mitigation**:
 - Use WPA3 or WPA2 with strong passphrase
 - Consider running on a separate VLAN/SSID
-- WiFi impact on Snowflake is minimal (low bandwidth required)
+- Signal strength is the variable that actually moved connection success in
+  this deployment (see [docs/PERFORMANCE.md](docs/PERFORMANCE.md)); nothing in
+  this repository watches the link or reconnects it, so a flapping WiFi shows up
+  as a quiet proxy, not as an alert
 
 ---
 
@@ -106,7 +147,7 @@ If you report a vulnerability, we follow this process:
 When deploying this Snowflake proxy:
 
 1. :white_check_mark: **Dedicated Hardware**: Use a dedicated Pi Zero (not your main Pi)
-2. :white_check_mark: **Bandwidth Limits**: Keep default 2 Mbit/s or lower for home networks
+2. :white_check_mark: **Bandwidth Limits**: Keep the 6/20 Mbps defaults or lower on a shared network, and remember the cap is interface-wide
 3. :white_check_mark: **Monitor Metrics**: Set up Prometheus alerts for unusual activity
 4. :white_check_mark: **Regular Updates**: Keep system packages updated (`apt upgrade`)
 5. :white_check_mark: **Network Isolation**: Consider separate VLAN if available

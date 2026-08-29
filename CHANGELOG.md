@@ -5,6 +5,91 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.7] - 2026-08-30: Documentation measured against the code it describes
+
+`SECURITY.md` listed a `CapabilityBoundingSet` that appears in no unit, a
+`MemoryMax=256M` against the unit's `128M`, and a "WiFi Monitoring: Auto-recovery
+on connection loss" feature that exists nowhere in this repository. The README
+opened its bandwidth section with a 2 Mbit/s default the scripts have never used
+and claimed "All services run with comprehensive sandboxing" for two units that
+have none. None of this was caught by a workflow, because nothing here reads
+prose: `lint.yml` runs ShellCheck and `bash -n`, and both were green throughout.
+This release is one pass over the four documents that make claims about the
+code, each claim taken back to the unit, script or default it comes from.
+
+### Changed
+
+- **The README states what this stack does not do.** A `## Scope` section and a
+  Known Limitations callout now name the four boundaries that were absent: the
+  metrics endpoint binds `0.0.0.0:9092` without authentication, the tc profile
+  caps the whole interface rather than Snowflake, `snowflake_bytes_proxied_total`
+  reports a per-interval upload figure that can decrease, and the systemd
+  sandboxing block applies to `snowflake-proxy.service` alone. The previous text
+  read "All services run with comprehensive sandboxing", which the two metrics
+  units do not.
+- **The Quick Start no longer pipes the installer into a shell.**
+  `install.sh` asks for confirmation with `read -p`, which gets no terminal when
+  the script arrives on stdin, so the advertised one-liner ended at
+  "Installation cancelled". The documented path downloads the script, offers
+  `--dry-run`, and then runs it. The manual path gained the two steps it was
+  missing (the textfile collector directory and the logrotate config) and no
+  longer substitutes `pi` for `@SERVICE_USER@`.
+- **The component tables match the tree.** `install.sh` and `configs/` were
+  absent from the layout table, `snowflake_metrics_addon.py` from the scripts
+  table, `snowflake-metrics-exporter.service` from the units table, and
+  `snowflake_proxy_memory_bytes` from the metrics table, which listed four of
+  the exporter's five metrics.
+- **A CLI reference quotes both `--help` outputs verbatim.** `install.sh` and
+  `tc-bandwidth-limiter.sh` had documented flags scattered through prose; the
+  option blocks are now the programs' own, word for word.
+- **Compatibility separates tested from assumed.** Pi 3/4/5, Bullseye, Debian 11+
+  and Ubuntu 22.04+ were listed as "fully supported" without having been run
+  there; they are now "should work, untested", and the tested row names the one
+  configuration that has actually been in service.
+- **The numbers carry their measuring conditions.** The feature list claimed
+  "~11 connections/h" against a performance table giving 4-12 connections per
+  device per day; the hourly figure is gone from the README and the 24h ranges
+  cite the deployment they come from. The WiFi finding says how it was observed
+  (two boards, same broker, differing placement) and that it is not a controlled
+  experiment.
+- **Template phrasing and slogan labels are gone.** The `**The Problem**:` opener,
+  the "Why I Built This" restatement of it, the checkmark-prefixed feature
+  slogans ("Resource Optimized", "Production-Proven"), and "Contributions
+  welcome!" were replaced by text that states facts; `Use Cases` gained a
+  "Poor fit" column of equal weight.
+
+- **`install.sh` header version raised to 1.3.1.** The file changed, so its
+  version line moves with it.
+
+### Fixed
+
+- **`SECURITY.md` describes the units that exist.** It claimed
+  `ProtectHome=read-only` (the unit sets `true`), `MemoryMax=256M` (it is
+  `128M`), a `CapabilityBoundingSet=CAP_NET_BIND_SERVICE` that appears in no
+  unit, and a 2 Mbit/s bandwidth default against the scripts' 6 and 20 Mbps. It
+  also listed "WiFi Monitoring: Auto-recovery on connection loss", a feature
+  this repository does not contain in any form, and "No Inbound Ports", while
+  `snowflake-metrics-server.py` binds `0.0.0.0:9092` without authentication.
+  "Memory-Only Operation: No persistent state" stood in the same file as a
+  logrotate config for the proxy's log. Every claim in that section now names
+  the unit, script or default it comes from, and the hardening block says it
+  covers the proxy service alone.
+- **The supported-versions table lists a release line that exists.** It offered
+  security fixes for 0.9.x and declared everything below 0.9.0 unsupported; the
+  changelog starts at 1.0.0 and there has never been a 0.x tag.
+- **`install.sh` reports one version.** The header comment said 1.3.0 while the
+  startup banner printed v1.0.0. The version is now a single `INSTALLER_VERSION`
+  constant that the banner reads, and the header no longer advertises the
+  `curl | bash` one-liner that its own confirmation prompt cannot survive.
+- **`docs/PERFORMANCE.md` states connection counts per day, not per hour.** Two
+  tables labelled their counts "per hour", which contradicted the rest of the
+  document: the per-device 7 and 4 sum to the 11 the load-distribution section
+  reports, and that 11 is the count the bandwidth section pairs with a daily
+  2-5 GB, against a stated normal band of 4-12 per device per 24h. Read as an
+  hourly rate those same devices would complete 168-192 connections a day. The
+  counts are per day; the label was wrong, and the correction is noted in the
+  document itself.
+
 ## [1.5.6] - 2026-08-28: GitHub identifies the license as MIT
 
 GitHub reported no license for this project, and has done so since the first
@@ -317,6 +402,8 @@ saturating the WiFi link, and exposes what it is doing to Prometheus.
 
 ---
 
+[1.5.7]: https://github.com/fidpa/snowflake-pi-zero/compare/v1.5.6...v1.5.7
+[1.5.6]: https://github.com/fidpa/snowflake-pi-zero/compare/v1.5.5...v1.5.6
 [1.5.5]: https://github.com/fidpa/snowflake-pi-zero/compare/v1.5.4...v1.5.5
 [1.5.4]: https://github.com/fidpa/snowflake-pi-zero/compare/v1.5.3...v1.5.4
 [1.5.3]: https://github.com/fidpa/snowflake-pi-zero/compare/v1.5.2...v1.5.3

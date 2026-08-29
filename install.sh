@@ -3,12 +3,23 @@
 # SPDX-FileCopyrightText: 2026 Marc Allgeier
 #
 # Snowflake Pi Zero Installer
-# Version: 1.3.0
-# One-line install: curl -sSL https://raw.githubusercontent.com/fidpa/snowflake-pi-zero/main/install.sh | bash
+# Version: 1.3.1
 #
 # This script installs Tor Snowflake Proxy on Raspberry Pi Zero with monitoring and bandwidth management.
+#
+# Download and run; do not pipe into a shell. main() asks for confirmation with
+# `read`, which has no terminal to read from when the script itself arrives on
+# stdin, so a piped run always cancels:
+#   curl -sSLO https://raw.githubusercontent.com/fidpa/snowflake-pi-zero/main/install.sh
+#   bash install.sh --dry-run
+#   bash install.sh
 
 set -uo pipefail
+
+# Mirrors the `# Version:` header above, which is the canonical entry and the one
+# the release gate greps for. Both move together; the banner reads this one.
+# They drifted once: the header said 1.3.0 while the banner printed v1.0.0.
+readonly INSTALLER_VERSION="1.3.1"
 
 # ============================================================================
 # CONFIGURATION
@@ -515,7 +526,7 @@ verify_installation() {
 main() {
     echo ""
     echo "═══════════════════════════════════════════════════"
-    echo "  Snowflake Pi Zero Installer v1.0.0"
+    echo "  Snowflake Pi Zero Installer v${INSTALLER_VERSION}"
     echo "═══════════════════════════════════════════════════"
     echo ""
     echo "Device Name:      $DEVICE_NAME"
